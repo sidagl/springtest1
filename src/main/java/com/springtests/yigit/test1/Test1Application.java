@@ -21,7 +21,7 @@ public class Test1Application {
 
         System.out.println("*******");
 
-        
+
         //Getting bean from BeanFactory
         // -- depends on spring xml config
         BeanFactory beanFactory = new XmlBeanFactory(new FileSystemResource("spring.xml"));
