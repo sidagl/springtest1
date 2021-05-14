@@ -35,7 +35,7 @@ node {
           }
     }
     stage("Modify Configuration"){
-        sh " sed -i 's/REPLACE/${image}/g' **/docker/spring_test_app.yaml"
+        sh " sed -i 's|REPLACE|${image}|g' **/docker/spring_test_app.yaml"
     }
 
      stage("Docker Build & Push")
