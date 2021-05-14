@@ -48,15 +48,15 @@ node {
             sh """ssh ${Username}@192.168.56.106 \
              " kubectl cp ${hostname}:'/var/jenkins_home/workspace/spring test1/target/${file_name}' /opt/local-apps/docker/${file_name} \
              && kubectl cp ${hostname}:'/var/jenkins_home/workspace/spring test1/docker/Dockerfile' /opt/local-apps/docker/Dockerfile \
-             && docker build --build-arg JAR_FILE=/opt/local-apps/docker/${file_name} -t ${image} /opt/local-apps/docker/ \
+             && cd /opt/local-apps/docker/ \
+             && docker build --build-arg JAR_FILE=${file_name} -t ${image} . \
              && docker push ${image}"
              """
          }
 
         stage("Deploy"){
             sh """ssh ${Username}@192.168.56.106 \
-             " kubectl cp ${pod_name}:'/var/jenkins_home/workspace/spring test1/docker/spring_test_app.yaml' /opt/local-apps/  \
-               && kubectl apply -f /opt/local-apps/spring_test_app.yaml "
+             " kubectl apply -f /opt/local-apps/spring_test_app.yaml "
              """
         }
     }
