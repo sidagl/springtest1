@@ -37,7 +37,7 @@ node {
 
      stage("Docker Build")
      {
-        sh "docker build --build-arg JAR_FILE=build/libs/\*.jar -t ${image} ."
+        sh "docker build --build-arg JAR_FILE=build/libs/\\*.jar -t ${image} ."
      }
      stage("Docker Push")
      {
