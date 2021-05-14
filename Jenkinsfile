@@ -20,7 +20,7 @@ node {
     step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
 
       stage("build & SonarQube analysis") {
-              withSonarQubeEnv('My SonarQube Server') {
+              withSonarQubeEnv('sonarLocal') {
                  sh 'mvn clean package sonar:sonar'
               }
       }
