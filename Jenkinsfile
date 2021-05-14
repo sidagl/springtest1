@@ -34,25 +34,26 @@ node {
               }
           }
     }
-
-     stage("Docker Build")
-     {
-        sh "docker build --build-arg JAR_FILE=build/libs/\\*.jar -t ${image} ."
-     }
-     stage("Docker Push")
-     {
-         sh "docker push ${image}"
-     }
-
-     stage("Modify Configuration"){
+    stage("Modify Configuration"){
         sh " sed -i 's/REPLACE/${image}/g' **/docker/spring_test_app.yaml"
+    }
+
+     stage("Docker Build & Push")
+     {
+       withCredentials([usernamePassword(credentialsId:'master-creds', passwordVariable: 'Password', usernameVariable: 'Username')]) {
+            sh "scp build/libs/\\*.jar ${Username}:${Password}@192.168.56.106 /opt/local-apps"
+            sh "scp **/docker/spring_test_app.yml ${Username}:${Password}@192.168.56.106 /opt/local-apps"
+            sh "ssh ${Username}:${Password}@192.168.56.106"
+            sh "docker build --build-arg JAR_FILE=build/libs/\\*.jar -t ${image} ."
+            sh "docker push ${image}"
+        }
      }
 
      stage('Deploy'){
        withCredentials([usernamePassword(credentialsId:'master-creds', passwordVariable: 'Password', usernameVariable: 'Username')]) {
-             sh "scp **/docker/spring_test_app.yml ${Username}:${Password}@192.168.56.106 /opt/local-apps"
-       }
-       sh "kubectl apply -f /opt/local-apps/spring_test_app.yaml"
+          sh "ssh ${Username}:${Password}@192.168.56.106"
+          sh "kubectl apply -f /opt/local-apps/spring_test_app.yaml"
+        }
      }
 
   }catch(e){
