@@ -1,4 +1,5 @@
 node {
+ def image = "192.168.56.109:443/local/spring_test_app:v1.${currentBuild.number}"
   try{
     stage 'checkout project'
     checkout scm
@@ -19,20 +20,40 @@ node {
     stage 'Artifact'
     step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
 
-      stage("build & SonarQube analysis") {
+    stage("build & SonarQube analysis") {
               withSonarQubeEnv('sonarLocal') {
                  sh 'mvn clean package sonar:sonar'
               }
-      }
+    }
 
-      stage("Quality Gate"){
-          timeout(time: 1, unit: 'HOURS') {
+    stage("Quality Gate"){
+          timeout(time: 10, unit: 'MINUTES') {
               def qg = waitForQualityGate()
               if (qg.status != 'OK') {
                   error "Pipeline aborted due to quality gate failure: ${qg.status}"
               }
           }
-      }
+    }
+
+     stage("Docker Build")
+     {
+        sh "docker build --build-arg JAR_FILE=build/libs/\*.jar -t ${image} ."
+     }
+     stage("Docker Push")
+     {
+         sh "docker push ${image}"
+     }
+
+     stage("Modify Configuration"){
+        sh " sed -i 's/REPLACE/${image}/g' **/docker/spring_test_app.yaml"
+     }
+
+     stage('Deploy'){
+       withCredentials([usernamePassword(credentialsId:'master-creds', passwordVariable: 'Password', usernameVariable: 'Username')]) {
+             sh "scp **/docker/spring_test_app.yml ${Username}:${Password}@192.168.56.106 /opt/local-apps"
+       }
+       sh "kubectl apply -f /opt/local-apps/spring_test_app.yaml"
+     }
 
   }catch(e){
     throw e;
