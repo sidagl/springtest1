@@ -1,5 +1,6 @@
 node {
  def image = "192.168.56.109:443/local/spring_test_app:v1.${currentBuild.number}"
+ def file_name="test1-0.0.1-SNAPSHOT.jar"
   try{
     stage 'checkout project'
     checkout scm
@@ -12,7 +13,7 @@ node {
     sh "mvn test"
 
     stage 'package'
-    sh "mvn package"
+    sh "mvn clean package"
 
     stage 'report'
     step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
@@ -34,27 +35,31 @@ node {
               }
           }
     }
-    stage("Modify Configuration"){
-        sh " sed -i 's|REPLACE|${image}|g' **/docker/spring_test_app.yaml"
+    withCredentials([usernamePassword(credentialsId:'master-creds', passwordVariable: 'Password', usernameVariable: 'Username')]) {
+        stage("Modify Configuration"){
+            sh " sed -i 's|REPLACE|${image}|g' docker/spring_test_app.yaml"
+            sh """ssh ${Username}@192.168.56.106 \
+                 " kubectl cp ${hostname}:'/var/jenkins_home/workspace/spring test1/docker/spring_test_app.yaml' /opt/local-apps/spring_test_app.yaml"
+              """
+        }
+
+        stage("Docker Build & Push")
+         {
+            sh """ssh ${Username}@192.168.56.106 \
+             " kubectl cp ${hostname}:'/var/jenkins_home/workspace/spring test1/target/${file_name}' /opt/local-apps/docker/${file_name} \
+             && kubectl cp ${hostname}:'/var/jenkins_home/workspace/spring test1/docker/Dockerfile' /opt/local-apps/docker/Dockerfile \
+             && docker build --build-arg JAR_FILE=/opt/local-apps/docker/${file_name} -t ${image} /opt/local-apps/docker/ \
+             && docker push ${image}"
+             """
+         }
+
+        stage("Deploy"){
+            sh """ssh ${Username}@192.168.56.106 \
+             " kubectl cp ${pod_name}:'/var/jenkins_home/workspace/spring test1/docker/spring_test_app.yaml' /opt/local-apps/  \
+               && kubectl apply -f /opt/local-apps/spring_test_app.yaml "
+             """
+        }
     }
-
-     stage("Docker Build & Push")
-     {
-       withCredentials([usernamePassword(credentialsId:'master-creds', passwordVariable: 'Password', usernameVariable: 'Username')]) {
-            sh "scp build/libs/\\*.jar ${Username}:${Password}@192.168.56.106 /opt/local-apps"
-            sh "scp **/docker/spring_test_app.yml ${Username}:${Password}@192.168.56.106 /opt/local-apps"
-            sh "ssh ${Username}:${Password}@192.168.56.106"
-            sh "docker build --build-arg JAR_FILE=build/libs/\\*.jar -t ${image} ."
-            sh "docker push ${image}"
-        }
-     }
-
-     stage('Deploy'){
-       withCredentials([usernamePassword(credentialsId:'master-creds', passwordVariable: 'Password', usernameVariable: 'Username')]) {
-          sh "ssh ${Username}:${Password}@192.168.56.106"
-          sh "kubectl apply -f /opt/local-apps/spring_test_app.yaml"
-        }
-     }
 
   }catch(e){
     throw e;
