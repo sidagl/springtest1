@@ -38,6 +38,7 @@ public class Test1Application {
 
         Alien alien2 = (Alien) beanFactory.getBean("alien");
         alien2.code();
+        alien.control();
         System.out.println("alien age:" + alien2.getAge());
     }
 }

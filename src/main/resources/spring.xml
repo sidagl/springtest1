@@ -8,11 +8,14 @@
     Default scope is singleton but prototype can be chosen for multiple instance creation
     -->
    <!-- <bean id="alien" class="com.springtests.yigit.test1.Alien" scope="singleton"></bean>-->
-    <bean id="alien" class="com.springtests.yigit.test1.Alien" scope="prototype">
-        <property name="age" value="100"></property>
-        <property name="laptop" ref="laptop"></property>
+    <bean id="alien" class="com.springtests.yigit.test1.Alien"
+          scope="prototype" autowire="byType"   >
+        <constructor-arg value="100"></constructor-arg>
     </bean>
-    <bean class="com.springtests.yigit.test1.Laptop" id="laptop">
+    <bean class="com.springtests.yigit.test1.Laptop" id="laptop"
+    primary="true">
+    </bean>
+    <bean class="com.springtests.yigit.test1.Desktop" id="desktop">
     </bean>
 
 

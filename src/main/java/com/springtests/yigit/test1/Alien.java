@@ -5,15 +5,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Alien {
-
-
-    private int age=15;
-
-    // this allows autowiring of property to controlled component and allows usage without init
+    // this allows autowiring of property to controlled component
+    // and allows usage without init
     @Autowired
-    private Laptop laptop;
+    private Computer computer;
 
-    public Alien(){
+    private int age = 15;
+
+    public Alien(int age) {
+        this.age = age;
         System.out.println("Alien obj created");
     }
 
@@ -26,9 +26,8 @@ public class Alien {
     }
 
     public void control() {
-        laptop.compile();
+        computer.compile();
     }
-
 
 
     public int getAge() {
@@ -40,11 +39,11 @@ public class Alien {
     }
 
 
-    public Laptop getLaptop() {
-        return laptop;
+    public Computer getComputer() {
+        return computer;
     }
 
-    public void setLaptop(Laptop laptop) {
-        this.laptop = laptop;
+    public void setComputer(Computer computer) {
+        this.computer = computer;
     }
 }
