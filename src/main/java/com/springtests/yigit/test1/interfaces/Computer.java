@@ -1,4 +1,4 @@
-package com.springtests.yigit.test1;
+package com.springtests.yigit.test1.interfaces;
 
 public interface Computer {
       void compile();

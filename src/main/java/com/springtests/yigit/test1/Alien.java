@@ -1,6 +1,8 @@
 package com.springtests.yigit.test1;
 
+import com.springtests.yigit.test1.interfaces.Computer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component

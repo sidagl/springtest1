@@ -12,10 +12,10 @@
           scope="prototype" autowire="byType"   >
         <constructor-arg value="100"></constructor-arg>
     </bean>
-    <bean class="com.springtests.yigit.test1.Laptop" id="laptop"
-    primary="true">
+    <bean class="com.springtests.yigit.test1.base.Laptop" id="laptop"
+          primary="true">
     </bean>
-    <bean class="com.springtests.yigit.test1.Desktop" id="desktop">
+    <bean class="com.springtests.yigit.test1.base.Desktop" id="desktop">
     </bean>
 
 
