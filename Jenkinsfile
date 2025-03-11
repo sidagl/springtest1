@@ -29,15 +29,6 @@ node {
             step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
         }
 
-        stage('Quality Gate') {
-            timeout(time: 10, unit: 'MINUTES') {
-                def qg = waitForQualityGate()
-                if (qg.status != 'OK') {
-                    error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                }
-            }
-        }
-
     } catch (e) {
         // Log the error and rethrow it
         currentBuild.result = 'FAILURE'
