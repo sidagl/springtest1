@@ -17,6 +17,6 @@ class AlienTest {
 
     @Test
     void control() {
-        Assert.isTrue(true,"control test1");
+        Assert.isTrue(false,"control test1");
     }
 }
