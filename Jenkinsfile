@@ -36,30 +36,7 @@ node {
               }
           }
     }
-    withCredentials([usernamePassword(credentialsId:'master-creds', passwordVariable: 'Password', usernameVariable: 'Username')]) {
-        stage("Modify Configuration"){
-            sh " sed -i 's|REPLACE|${image}|g' docker/spring_test_app.yaml"
-            sh """ssh ${Username}@${master} \
-                 " kubectl cp ${hostname}:'/var/jenkins_home/workspace/spring test1/docker/spring_test_app.yaml' /opt/local-apps/spring_test_app.yaml"
-              """
-        }
-
-        stage("Docker Build & Push")
-         {
-            sh """ssh ${Username}@${master} \
-             " kubectl cp ${hostname}:'/var/jenkins_home/workspace/spring test1/target/${file_name}' /opt/local-apps/docker/${file_name} \
-             && kubectl cp ${hostname}:'/var/jenkins_home/workspace/spring test1/docker/Dockerfile' /opt/local-apps/docker/Dockerfile \
-             && cd /opt/local-apps/docker/ \
-             && docker build --build-arg JAR_FILE=${file_name} -t ${image} . \
-             && docker push ${image}"
-             """
-         }
-
-        stage("Deploy"){
-            sh """ssh ${Username}@${master} \
-             " kubectl apply -f /opt/local-apps/spring_test_app.yaml "
-             """
-        }
+    
     }
 
   }catch(e){
