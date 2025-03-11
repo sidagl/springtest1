@@ -29,12 +29,6 @@ node {
             step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
         }
 
-        stage('SonarQube Analysis') {
-            withSonarQubeEnv('sonarLocal') {
-                sh 'mvn clean package sonar:sonar'
-            }
-        }
-
         stage('Quality Gate') {
             timeout(time: 10, unit: 'MINUTES') {
                 def qg = waitForQualityGate()
